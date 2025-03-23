@@ -22,23 +22,23 @@ tile possible (tile with a value of 2) before the board becomes full.
 
 # Game Phases and Rules or a regular reverse 2048 game
 ## Initial Board Setup
-• The board consists of a 4×4 grid initially filled with 2 tiles having a value of 2048
+• The board consists of a 4×4 grid initially filled with 2 tiles having a value of 2048 </br>
 • New tiles appear after each move, following a random pattern. The new tiles have large
 numerical values of either 2048 or 1024 (no tile value lower than this should appear on the
-grid)
+grid) </br>
 
 ## Movement
 • Players can slide all tiles in a chosen direction (left, right, up, down). When two tiles of the
-same value collide, they merge into one tile with half the value. For example:
-– Two 2048s combine into a 1024
-– Two 1024s combine into a 512
-– Two 512s combine into a 256
-– and so on, all down to two 4s combine into a 2
-• A move is valid only if at least one tile can be merged or moved.
+same value collide, they merge into one tile with half the value. For example: </br>
+– Two 2048s combine into a 1024 </br>
+– Two 1024s combine into a 512 </br>
+– Two 512s combine into a 256 </br>
+– and so on, all down to two 4s combine into a 2 </br>
+• A move is valid only if at least one tile can be merged or moved. </br>
 
 ## End Condition
-• The game is won if a tile of value 2 is reached before the board becomes full.
-• The game is lost if there are no valid moves left.
+• The game is won if a tile of value 2 is reached before the board becomes full. </br>
+• The game is lost if there are no valid moves left. </br>
 
 # Project Requirements and Constraints
 In this project, you required to:
@@ -78,15 +78,15 @@ moves per game.
 The file holding the configurations is called reverse 2048.txt. An example of
 the input would be as follows:
 
-512 , 3
-128 , 4
-512 , 5
-256 , 4
+512 , 3 </br>
+128 , 4 </br>
+512 , 5 </br>
+256 , 4 </br>
 
-• The second line reads as, a game of reverse 512 on a board size of 3 × 3.
-• The first line reads as, a game of reverse 128 on a board size of 4 × 4.
-• The second line reads as, a game of reverse 512 on a board size of 5 × 5.
-• The third line reads as, a game of reverse 256 on a board size of 4 × 4.
+• The second line reads as, a game of reverse 512 on a board size of 3 × 3. </br>
+• The first line reads as, a game of reverse 128 on a board size of 4 × 4. </br>
+• The second line reads as, a game of reverse 512 on a board size of 5 × 5. </br>
+• The third line reads as, a game of reverse 256 on a board size of 4 × 4. </br>
 
 # Output Data
 This output file must be called output.txt. This file should contain information for each puzzle including the puzzle
