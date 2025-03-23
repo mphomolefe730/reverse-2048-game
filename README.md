@@ -1,7 +1,7 @@
 # reverse-2048-game
 Write C++ code for a program that reads in an unknown num- ber of “Reverse 2048” games. The program must then use an algorithm to solve each of the solvable puzzles given in the input file.
 
-#Part 1: Background
+# Part 1: Background
 Reverse 2048 is a variation of the classic 2048 puzzle game, a sliding tile game that is played on
 a 4×4 grid. Unlike the original game, where the goal is to merge tiles to reach 2048, in Reverse
 2048, the player must divide tiles to reach the smallest possible value, typically tile 2.
@@ -14,20 +14,20 @@ of the game are:
 3. The game ends when there are no more valid moves or when the smallest achievable value
 has been reached.
 
-#Problem to be solved
+# Problem to be solved
 Your task is to develop a C++ program that can solve any given configuration of Reverse 2048
 based on specified project requirements and constraints. Since the game requires a different strate-
 gic approach than traditional 2048, your implementation must optimize moves to reach the smallest
 tile possible (tile with a value of 2) before the board becomes full.
 
-#Game Phases and Rules or a regular reverse 2048 game
-##Initial Board Setup
+# Game Phases and Rules or a regular reverse 2048 game
+## Initial Board Setup
 • The board consists of a 4×4 grid initially filled with 2 tiles having a value of 2048
 • New tiles appear after each move, following a random pattern. The new tiles have large
 numerical values of either 2048 or 1024 (no tile value lower than this should appear on the
 grid)
 
-##Movement
+## Movement
 • Players can slide all tiles in a chosen direction (left, right, up, down). When two tiles of the
 same value collide, they merge into one tile with half the value. For example:
 – Two 2048s combine into a 1024
@@ -36,11 +36,11 @@ same value collide, they merge into one tile with half the value. For example:
 – and so on, all down to two 4s combine into a 2
 • A move is valid only if at least one tile can be merged or moved.
 
-##End Condition
+## End Condition
 • The game is won if a tile of value 2 is reached before the board becomes full.
 • The game is lost if there are no valid moves left.
 
-#Project Requirements and Constraints
+# Project Requirements and Constraints
 In this project, you required to:
 1. Implement Reverse 2048 that supports tile movement and merging based on division by 2.
 2. Develop two different algorithms that will play Reverse 2048 against each other. The selected
@@ -74,7 +74,7 @@ game ends as unsolved.
 10. Optimize game performance to ensure that the solver does not exceed a maximum of 1000
 moves per game.
 
-#Input Data
+# Input Data
 The file holding the configurations is called reverse 2048.txt. An example of
 the input would be as follows:
 
@@ -88,7 +88,7 @@ the input would be as follows:
 • The second line reads as, a game of reverse 512 on a board size of 5 × 5.
 • The third line reads as, a game of reverse 256 on a board size of 4 × 4.
 
-#Output Data
+# Output Data
 This output file must be called output.txt. This file should contain information for each puzzle including the puzzle
 number, which algorithm won (if it solved the puzzle in less than 1000 moves), the number of
 moves made as well as each consecutive move. If the puzzle is not solved and 1000 moves are
