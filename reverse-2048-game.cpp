@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <iostream>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -28,13 +30,14 @@ class Game2048{
 	vector<vector<int>> grid;
 	vector<vector<int>> borderNeighbourWhoWasMerged;
 	
-	string emptySpace = "----", divider = " | ";
+	string emptySpace = "--", divider = " | ";
 	public:
 		bool hasTwo = false, noPossibleMoves = false;
 		int emptySlot;
 		Game2048(int a, int b):gameSize(a),startSize(b){
 			grid.resize(gameSize, vector<int>(gameSize, 0));
 			emptySlot = (gameSize*gameSize) -2;
+			algOneMove = 0;
 		};
 
 		void setUpGame(){
@@ -70,14 +73,15 @@ class Game2048{
 		void printCurrentGrid(){
 			//cout << "printing curent grid function"<<endl;
 			for(int i = 0; i < grid.size(); i++){
+				cout << divider <<setw(2);
 				for(int j = 0; j < grid.size(); j++){
 					if(grid[i][j] == 0){
-						cout << setw(4) << " " << emptySpace;
+						cout << setw(6) << emptySpace;
 					}else{
-						cout << setw(4) << " " << grid[i][j];
+						cout << setw(6) << grid[i][j];
 					}
 				};
-				cout << setw(4) << divider << endl;
+				cout << setw(2) << divider << endl;
 			}
 		};
 		
@@ -262,7 +266,7 @@ class Game2048{
 			}else{
 				moveRight();
 			};
-			algOneMove ++;
+			algOneMove++;
 			cout<< "Move "<< algOneMove << ": Alg_1: "<< bestMove << endl;
 		}
 		
