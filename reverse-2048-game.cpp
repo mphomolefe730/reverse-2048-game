@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <random>
 
@@ -13,6 +15,11 @@ struct xy{
 struct scoreObject{
 	int newScore;
 	int previousScore;
+};
+
+struct gameProperties{
+	int startingTitle;
+	int gameSize;
 };
 
 class Game2048{
@@ -288,6 +295,12 @@ class Game2048{
 				};
 			};
 
+			if(algOneMove > 1000){
+				cout<<"Maximum moves reached"<<endl;
+				emptySlot = 0;
+				noPossibleMoves = true;
+			};
+
 			if(emptySlot == 0 && upScore.previousScore == upScore.newScore && downScore.previousScore == downScore.newScore && leftScore.previousScore == leftScore.newScore && rightScore.previousScore == rightScore.newScore){
 				noPossibleMoves = true;
 			}
@@ -323,39 +336,68 @@ class Game2048{
 		};
 };
 
+vector<gameProperties> openFile(string fileName){
+	vector<gameProperties> gp = {};
+	
+	fstream file(fileName);
+	if (!file.is_open()) {
+		cerr << "Error opening file!" << endl;
+	}
+
+	string line;
+	while (getline(file, line)) {
+		stringstream ss(line);
+		int openingTitle, gameSize;
+		char comma;
+		ss >> openingTitle >> comma >> gameSize;
+		gameProperties temp = {openingTitle, gameSize};
+		gp.push_back(temp);
+	}
+	
+	file.close();
+	return gp;
+};
+
 int main(){
-	int gameSize = 3, openingTile = 2048;
-	Game2048 object(gameSize, openingTile);
-	char userInput = 'q';
-	object.setUpGame();
+	
+	string fileName = "reverse_2048.txt";
+	int games = 1;
+	vector<gameProperties> values = openFile(fileName);
+	
+	for(auto& v:values){
+		cout << "Game: " << games<< endl;
+		Game2048 object(v.gameSize,v.startingTitle);
+		object.setUpGame();
 
-	//run the algorithm, check if solved, checck if there spaces
-	while (object.emptySlot != 0 && object.noPossibleMoves != true){
-		cout << "-------------------------------------------------------------------" << endl;
-		object.AlgOneGreedyAlgorithm();
-		object.checkIfSolved();
-		if(object.hasTwo == true){
-			cout << "you won!" << endl;
-			break;
-		}
-		if(object.emptySlot == 0 && object.noPossibleMoves == true){
+		//run the algorithm, check if solved, checck if there spaces
+		while (object.emptySlot != 0 && object.noPossibleMoves != true){
+			cout << "-------------------------------------------------------------------" << endl;
+			object.AlgOneGreedyAlgorithm();
+			object.checkIfSolved();
+			if(object.hasTwo == true){
+				cout << "you won!" << endl;
+				break;
+			}
+			if(object.emptySlot == 0 && object.noPossibleMoves == true){
+				object.printCurrentGrid();
+				cout << "not empty spaces and possible moves left\nGAME OVER" << endl;
+				break;
+			}
+			
+			;
+			/*if(userInput == 'u'){
+				object.moveUp();
+			}else if(userInput == 'd'){
+				object.moveDown();
+			}else if(userInput == 'r'){
+				object.moveRight();
+			}else if(userInput == 'l'){
+				object.moveLeft();
+			}*/
+			object.addElementToGrid();
 			object.printCurrentGrid();
-			cout << "not empty spaces and possible moves left\nGAME OVER" << endl;
-			break;
 		}
-
-		//object.getNextMove();
-		/*if(userInput == 'u'){
-			object.moveUp();
-		}else if(userInput == 'd'){
-			object.moveDown();
-		}else if(userInput == 'r'){
-			object.moveRight();
-		}else if(userInput == 'l'){
-			object.moveLeft();
-		}*/
-		object.addElementToGrid();
-		object.printCurrentGrid();
+		games++;
 	}
 	return 0;
 }
