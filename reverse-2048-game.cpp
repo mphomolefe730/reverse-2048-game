@@ -10,15 +10,20 @@ struct xy{
 	int y;
 };
 
+struct scoreObject{
+	int newScore;
+	int previousScore;
+};
+
 class Game2048{
-	int gameSize, startSize;// emptySlot;
+	int gameSize, startSize, algOneMove;// emptySlot;
 	//bool hasTwo = false;
 	vector<vector<int>> grid;
 	vector<vector<int>> borderNeighbourWhoWasMerged;
 	
 	string emptySpace = "----", divider = " | ";
 	public:
-		bool hasTwo = false;
+		bool hasTwo = false, noPossibleMoves = false;
 		int emptySlot;
 		Game2048(int a, int b):gameSize(a),startSize(b){
 			grid.resize(gameSize, vector<int>(gameSize, 0));
@@ -195,10 +200,10 @@ class Game2048{
 			}
 		};
 		
-		int evaluateMove(char direction){
+		scoreObject evaluateMove(char direction){
 			//im going to modify the grid so i can find move with the lost score
 			vector<vector<int>> originalGrid = grid;
-			int score = 0;
+			int newScore = 0, previousScore = 0;
 			
 			if(direction == 'u'){
 				moveUp();
@@ -210,13 +215,22 @@ class Game2048{
 				moveRight();
 			};
 
-			for(auto& row:grid){
+			for(auto& row:originalGrid){
 				for(int value: row){
-					score += value;
+					previousScore += value;
 				};
 			};
+			
+			for(auto& row:grid){
+				for(int value: row){
+					newScore += value;
+				};
+			};
+
 			grid = originalGrid; // bring grid back to original shape
-			return score;
+			
+			scoreObject ob = {newScore, previousScore };
+			return ob;
 		}
 
 		void AlgOneGreedyAlgorithm(){
@@ -225,14 +239,13 @@ class Game2048{
 			int lowestScore = 9999;
 
 			for (char direction : directions) {
-				int currentMoveScore = evaluateMove(direction);
-				if (currentMoveScore < lowestScore) {
-					lowestScore = currentMoveScore;
+				scoreObject currentMoveScore = evaluateMove(direction);
+				if (currentMoveScore.newScore < lowestScore) {
+					lowestScore = currentMoveScore.newScore;
 					bestMove = direction;
 				}
 			}
-			cout<< "| best move: "<< bestMove;
-			
+
 			if(bestMove == 'u'){
 				moveUp();
 			}else if(bestMove == 'd'){
@@ -242,7 +255,8 @@ class Game2048{
 			}else{
 				moveRight();
 			};
-			
+			algOneMove ++;
+			cout<< "Move "<< algOneMove << ": Alg_1: "<< bestMove << endl;
 		}
 		
 		void checkIfSolved(){
@@ -255,10 +269,28 @@ class Game2048{
 						emptySlot ++;
 					}
 				}
+			};
+			//cout << "| empty slots: " << emptySlot << endl;
+			
+			//checks if all possible moves have been done
+			vector<char> directions = {'u', 'd', 'l', 'r'};
+			scoreObject leftScore, rightScore, upScore, downScore;
+			
+			for(auto& direction: directions){
+				if(direction == 'u'){
+					upScore = evaluateMove(direction);
+				}else if(direction == 'd'){
+					downScore = evaluateMove(direction);
+				}else if(direction == 'l'){
+					leftScore = evaluateMove(direction);
+				}else{
+					rightScore = evaluateMove(direction);
+				};
+			};
+
+			if(emptySlot == 0 && upScore.previousScore == upScore.newScore && downScore.previousScore == downScore.newScore && leftScore.previousScore == leftScore.newScore && rightScore.previousScore == rightScore.newScore){
+				noPossibleMoves = true;
 			}
-			emptySlot -= 1;
-			cout << "| empty slots: " << emptySlot << endl;
-			//cout<<"function ran and empty slots are: " << emptySlot << endl;
 		}
 		
 		bool checkIfElementWasChanged(vector<int> sendValue, char c){
@@ -298,18 +330,17 @@ int main(){
 	object.setUpGame();
 
 	//run the algorithm, check if solved, checck if there spaces
-	while (userInput != 'c'){
-		cout << "===================================================================" << endl;
-		cout << "enter value: ";
-		cin >> userInput;
+	while (object.emptySlot != 0 && object.noPossibleMoves != true){
+		cout << "-------------------------------------------------------------------" << endl;
 		object.AlgOneGreedyAlgorithm();
 		object.checkIfSolved();
 		if(object.hasTwo == true){
 			cout << "you won!" << endl;
 			break;
 		}
-		if(object.emptySlot == 0){
-			cout << "not empty spaces left" << endl;
+		if(object.emptySlot == 0 && object.noPossibleMoves == true){
+			object.printCurrentGrid();
+			cout << "not empty spaces and possible moves left\nGAME OVER" << endl;
 			break;
 		}
 
