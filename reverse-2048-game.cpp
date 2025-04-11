@@ -11,14 +11,18 @@ struct xy{
 };
 
 class Game2048{
-	int gameSize, startSize;
+	int gameSize, startSize;// emptySlot;
+	//bool hasTwo = false;
 	vector<vector<int>> grid;
 	vector<vector<int>> borderNeighbourWhoWasMerged;
 	
 	string emptySpace = "----", divider = " | ";
 	public:
+		bool hasTwo = false;
+		int emptySlot;
 		Game2048(int a, int b):gameSize(a),startSize(b){
 			grid.resize(gameSize, vector<int>(gameSize, 0));
+			emptySlot = (gameSize*gameSize) -2;
 		};
 
 		void setUpGame(){
@@ -61,12 +65,11 @@ class Game2048{
 						cout << setw(4) << " " << grid[i][j];
 					}
 				};
-				cout << divider << endl;
+				cout << setw(4) << divider << endl;
 			}
 		};
 		
 		void moveLeft(){
-			cout<< "moving puzzle right"<<endl;
 			for(int i = 0; i < grid.size(); i++){
 				for(int j = grid.size() -1; j > 0;j--){
 					if(grid[i][j-1] != 0){
@@ -97,12 +100,10 @@ class Game2048{
 		};
 		
 		void moveRight(){
-			cout<< "moving puzzle right"<<endl;
 			for(int i = 0; i < grid.size(); i++){
 				for(int j = 0; j < grid.size() - 1;j++){
 					if(grid[i][j+1] != 0){
 						if(grid[i][j+1] == grid[i][j]){
-							cout<< "exchange: " << i << j << " with " << i << j+1 << endl;
 							vector<int> cord = {i, j+1};
 							if(checkIfElementWasChanged(cord, 'r')){
 							}else{
@@ -129,7 +130,6 @@ class Game2048{
 		};
 
 		void moveUp(){
-			cout<< "moving puzzle up"<<endl;
 			for(int i = gameSize - 1; i > 0; i--){
 				for(int j = 0; j < grid.size(); j++){
 					//check the top is not empty
@@ -163,7 +163,6 @@ class Game2048{
 		};
 
 		void moveDown(){
-			cout<< "moving puzzle down"<<endl;
 			for(int i = 0; i< grid.size() - 1; i++){
 				for(int j = 0; j < grid.size(); j++){
 					//check the bottom is not empty
@@ -196,6 +195,72 @@ class Game2048{
 			}
 		};
 		
+		int evaluateMove(char direction){
+			//im going to modify the grid so i can find move with the lost score
+			vector<vector<int>> originalGrid = grid;
+			int score = 0;
+			
+			if(direction == 'u'){
+				moveUp();
+			}else if(direction == 'd'){
+				moveDown();
+			}else if(direction == 'l'){
+				moveLeft();
+			}else{
+				moveRight();
+			};
+
+			for(auto& row:grid){
+				for(int value: row){
+					score += value;
+				};
+			};
+			grid = originalGrid; // bring grid back to original shape
+			return score;
+		}
+
+		void AlgOneGreedyAlgorithm(){
+			vector<char> directions = {'u', 'd', 'l', 'r'};
+			char bestMove = 'u';
+			int lowestScore = 9999;
+
+			for (char direction : directions) {
+				int currentMoveScore = evaluateMove(direction);
+				if (currentMoveScore < lowestScore) {
+					lowestScore = currentMoveScore;
+					bestMove = direction;
+				}
+			}
+			cout<< "| best move: "<< bestMove;
+			
+			if(bestMove == 'u'){
+				moveUp();
+			}else if(bestMove == 'd'){
+				moveDown();
+			}else if(bestMove == 'l'){
+				moveLeft();
+			}else{
+				moveRight();
+			};
+			
+		}
+		
+		void checkIfSolved(){
+			emptySlot = 0;
+			for(int i = 0; i < grid.size(); i++){
+				for(int j = 0; j < grid.size(); j++){
+					if(grid[i][j] == 2){
+						hasTwo = true;
+					}else if(grid[i][j] == 0){
+						emptySlot ++;
+					}
+				}
+			}
+			emptySlot -= 1;
+			cout << "| empty slots: " << emptySlot << endl;
+			//cout<<"function ran and empty slots are: " << emptySlot << endl;
+		}
+		
 		bool checkIfElementWasChanged(vector<int> sendValue, char c){
 			//if previous top element on x axis was modified, dont change current value
 			for(vector<int> b:borderNeighbourWhoWasMerged){
@@ -210,16 +275,14 @@ class Game2048{
 					return true;
 				}
 			}
-			cout<<"error invalid input for direction"<<endl;
+			//cout<<"error invalid input for direction, value: "<< c <<endl;
 			return false;
-		}
+		};
 
 		void addElementToGrid(){
 			xy newPosition = getRandomPosition();
 			//cout how many empty spaces there are, check if the game is over or now
-			//
-			//
-			//
+			
 			//get new position if below is not 0 
 			while(grid[newPosition.x][newPosition.y] != 0){
 				newPosition = getRandomPosition();
@@ -229,14 +292,29 @@ class Game2048{
 };
 
 int main(){
-	Game2048 object(5, 2048);
-	char userInput = 1;
+	int gameSize = 3, openingTile = 2048;
+	Game2048 object(gameSize, openingTile);
+	char userInput = 'q';
 	object.setUpGame();
 
+	//run the algorithm, check if solved, checck if there spaces
 	while (userInput != 'c'){
+		cout << "===================================================================" << endl;
 		cout << "enter value: ";
 		cin >> userInput;
-		if(userInput == 'u'){
+		object.AlgOneGreedyAlgorithm();
+		object.checkIfSolved();
+		if(object.hasTwo == true){
+			cout << "you won!" << endl;
+			break;
+		}
+		if(object.emptySlot == 0){
+			cout << "not empty spaces left" << endl;
+			break;
+		}
+
+		//object.getNextMove();
+		/*if(userInput == 'u'){
 			object.moveUp();
 		}else if(userInput == 'd'){
 			object.moveDown();
@@ -244,7 +322,7 @@ int main(){
 			object.moveRight();
 		}else if(userInput == 'l'){
 			object.moveLeft();
-		}
+		}*/
 		object.addElementToGrid();
 		object.printCurrentGrid();
 	}
