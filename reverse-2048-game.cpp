@@ -19,25 +19,34 @@ struct scoreObject{
 	int previousScore;
 };
 
+struct MoveAssessment {
+	char direction;
+	int immediate_score;
+	int future_potential;
+	int risk_factor;
+};
+
 struct gameProperties{
 	int startingTitle;
 	int gameSize;
 };
 
 class Game2048{
-	int gameSize, startSize, algOneMove;// emptySlot;
-	//bool hasTwo = false;
-	vector<vector<int>> grid;
+	int gameSize, startSize, algOneMove, algTwoMove;
+	vector<vector<int>> gridAlgOne, gridAlgTwo;
 	vector<vector<int>> borderNeighbourWhoWasMerged;
 	
 	string emptySpace = "--", divider = " | ";
 	public:
-		bool hasTwo = false, noPossibleMoves = false;
-		int emptySlot;
+		bool hasTwoAlgOne = false, hasTwoAlgTwo = false, noPossibleMovesAlgOne = false, noPossibleMovesAlgTwo = false;
+		int emptySlotAlgOne, emptySlotAlgTwo;
 		Game2048(int a, int b):gameSize(a),startSize(b){
-			grid.resize(gameSize, vector<int>(gameSize, 0));
-			emptySlot = (gameSize*gameSize) -2;
+			gridAlgOne.resize(gameSize, vector<int>(gameSize, 0));
+			gridAlgTwo.resize(gameSize, vector<int>(gameSize, 0));
+			emptySlotAlgOne = (gameSize*gameSize) -2;
+			emptySlotAlgOne = (gameSize*gameSize) -2;
 			algOneMove = 0;
+			algTwoMove = 0;
 		};
 
 		void setUpGame(){
@@ -48,8 +57,12 @@ class Game2048{
 				initialPositionTwo = getRandomPosition();
 			}
 			
-			grid[initialPositionOne.x][initialPositionOne.y] = startSize;
-			grid[initialPositionTwo.x][initialPositionTwo.y] = startSize;
+			gridAlgOne[initialPositionOne.x][initialPositionOne.y] = startSize;
+			gridAlgOne[initialPositionTwo.x][initialPositionTwo.y] = startSize;
+
+			
+			gridAlgTwo[initialPositionOne.x][initialPositionOne.y] = startSize;
+			gridAlgTwo[initialPositionTwo.x][initialPositionTwo.y] = startSize;
 
 			cout << "===================================================================" << endl;
 			cout<< "first x & y: " << initialPositionOne.x << " " << initialPositionOne.y << " | " << "second x & y: " << initialPositionTwo.x << initialPositionTwo.y <<" | size: "<< gameSize <<" | Initial Board" <<endl;
@@ -72,20 +85,30 @@ class Game2048{
 
 		void printCurrentGrid(){
 			//cout << "printing curent grid function"<<endl;
-			for(int i = 0; i < grid.size(); i++){
+			for(int i = 0; i < gridAlgOne.size(); i++){
 				cout << divider <<setw(2);
-				for(int j = 0; j < grid.size(); j++){
-					if(grid[i][j] == 0){
+				for(int j = 0; j < gridAlgOne.size(); j++){
+					if(gridAlgOne[i][j] == 0){
 						cout << setw(6) << emptySpace;
 					}else{
-						cout << setw(6) << grid[i][j];
+						cout << setw(6) << gridAlgOne[i][j];
 					}
 				};
-				cout << setw(2) << divider << endl;
+				cout << setw(2) << divider;
+
+				for(int j = 0; j < gridAlgTwo.size(); j++){
+					if(gridAlgTwo[i][j] == 0){
+						cout << setw(6) << emptySpace;
+					}else{
+						cout << setw(6) << gridAlgTwo[i][j];
+					}
+				};
+
+				cout << endl;	
 			}
 		};
 		
-		void moveLeft(){
+		void moveLeft(vector<vector<int>>& grid){
 			for(int i = 0; i < grid.size(); i++){
 				for(int j = grid.size() -1; j > 0;j--){
 					if(grid[i][j-1] != 0){
@@ -115,7 +138,7 @@ class Game2048{
 			}
 		};
 		
-		void moveRight(){
+		void moveRight(vector<vector<int>>& grid){
 			for(int i = 0; i < grid.size(); i++){
 				for(int j = 0; j < grid.size() - 1;j++){
 					if(grid[i][j+1] != 0){
@@ -145,7 +168,7 @@ class Game2048{
 			};
 		};
 
-		void moveUp(){
+		void moveUp(vector<vector<int>>& grid){
 			for(int i = gameSize - 1; i > 0; i--){
 				for(int j = 0; j < grid.size(); j++){
 					//check the top is not empty
@@ -178,7 +201,7 @@ class Game2048{
 			}
 		};
 
-		void moveDown(){
+		void moveDown(vector<vector<int>>& grid){
 			for(int i = 0; i< grid.size() - 1; i++){
 				for(int j = 0; j < grid.size(); j++){
 					//check the bottom is not empty
@@ -211,19 +234,19 @@ class Game2048{
 			}
 		};
 		
-		scoreObject evaluateMove(char direction){
+		scoreObject evaluateMove(char direction, vector<vector<int>>& grid){
 			//im going to modify the grid so i can find move with the lost score
 			vector<vector<int>> originalGrid = grid;
 			int newScore = 0, previousScore = 0;
 			
 			if(direction == 'u'){
-				moveUp();
+				moveUp(grid);
 			}else if(direction == 'd'){
-				moveDown();
+				moveDown(grid);
 			}else if(direction == 'l'){
-				moveLeft();
+				moveLeft(grid);
 			}else{
-				moveRight();
+				moveRight(grid);
 			};
 
 			for(auto& row:originalGrid){
@@ -245,12 +268,16 @@ class Game2048{
 		}
 
 		void AlgOneGreedyAlgorithm(){
+			if(algOneMove > 1000 || noPossibleMovesAlgOne == true){
+				return;
+			};
+
 			vector<char> directions = {'u', 'd', 'l', 'r'};
 			char bestMove = 'u';
 			int lowestScore = 9999;
 
 			for (char direction : directions) {
-				scoreObject currentMoveScore = evaluateMove(direction);
+				scoreObject currentMoveScore = evaluateMove(direction, gridAlgOne);
 				if (currentMoveScore.newScore < lowestScore) {
 					lowestScore = currentMoveScore.newScore;
 					bestMove = direction;
@@ -258,55 +285,152 @@ class Game2048{
 			}
 
 			if(bestMove == 'u'){
-				moveUp();
+				moveUp(gridAlgOne);
 			}else if(bestMove == 'd'){
-				moveDown();
+				moveDown(gridAlgOne);
 			}else if(bestMove == 'l'){
-				moveLeft();
+				moveLeft(gridAlgOne);
 			}else{
-				moveRight();
+				moveRight(gridAlgOne);
 			};
 			algOneMove++;
-			cout<< "Move "<< algOneMove << ": Alg_1: "<< bestMove << endl;
+			cout<< "Move "<< algOneMove << ": Alg_1: "<< bestMove << setw(2) << divider;
+		}
+
+	void AlgTwoStrategicMinimax() {
+			if(algTwoMove > 1000 || noPossibleMovesAlgTwo == true){
+				return;
+			};
+
+		    vector<char> directions = {'u', 'd', 'l', 'r'};
+		    MoveAssessment best_move = { 'u', INT_MAX, INT_MAX, 0 };
+
+		    for (char first_move : directions) {
+		        vector<vector<int>> original_grid = gridAlgTwo;
+		        vector<scoreObject> second_scores;
+		        scoreObject first_score = evaluateMove(first_move, gridAlgTwo);
+		        
+		        // Apply first move temporarily
+		        if(first_move == 'u') moveUp(gridAlgTwo);
+		        else if(first_move == 'd') moveDown(gridAlgTwo);
+		        else if(first_move == 'l') moveLeft(gridAlgTwo);
+		        else moveRight(gridAlgTwo);
+
+		        // Second move evaluation
+		        for (char second_move : directions) {
+		            second_scores.push_back(evaluateMove(second_move, gridAlgTwo));
+		        }
+
+		        int max_second_score = INT_MIN;
+		        int min_second_score = INT_MAX;
+		        for (auto& score : second_scores) {
+		            max_second_score = max(max_second_score, score.newScore);
+		            min_second_score = min(min_second_score, score.newScore);
+		        }
+		        int risk_factor = max_second_score - min_second_score;
+
+		        int avg_future_potential = 0;
+		        for (auto& score : second_scores) {
+		            avg_future_potential += score.newScore;
+		        }
+		        avg_future_potential /= directions.size();
+
+		        int strategic_value = first_score.newScore * 0.6 + avg_future_potential * 0.3 - risk_factor * 0.1;
+
+		        if (strategic_value < best_move.immediate_score) {
+		            best_move = {
+		                first_move,
+		                first_score.newScore,
+		                avg_future_potential,
+		                risk_factor
+		            };
+		        }
+
+		        gridAlgTwo = original_grid;
+		    }
+
+		    // Execute best move
+		    if(best_move.direction == 'u') moveUp(gridAlgTwo);
+		    else if(best_move.direction == 'd') moveDown(gridAlgTwo);
+		    else if(best_move.direction == 'l') moveLeft(gridAlgTwo);
+		    else moveRight(gridAlgTwo);
+		    
+		    algTwoMove++;
+			cout<< "Move "<< algTwoMove << ": Alg_2: "<< best_move.direction << endl;
+		    //cout << "Move " << algStrategicMove << ": Alg_Strategic: " << best_move.direction  << " (Score: " << best_move.immediate_score  << ", Future: " << best_move.future_potential  << ", Risk: " << best_move.risk_factor << ")" << endl;
 		}
 		
 		void checkIfSolved(){
-			emptySlot = 0;
-			for(int i = 0; i < grid.size(); i++){
-				for(int j = 0; j < grid.size(); j++){
-					if(grid[i][j] == 2){
-						hasTwo = true;
-					}else if(grid[i][j] == 0){
-						emptySlot ++;
+			emptySlotAlgOne = 0; 
+			emptySlotAlgTwo = 0;
+
+			for(int i = 0; i < gridAlgOne.size(); i++){
+				for(int j = 0; j < gridAlgOne.size(); j++){
+					if(gridAlgOne[i][j] == 2){
+						hasTwoAlgOne = true;
+					}else if(gridAlgOne[i][j] == 0){
+						emptySlotAlgOne ++;
+					}
+				}
+
+				for(int j = 0; j < gridAlgTwo.size(); j++){
+					if(gridAlgTwo[i][j] == 2){
+						hasTwoAlgTwo = true;
+					}else if(gridAlgTwo[i][j] == 0){
+						emptySlotAlgTwo ++;
 					}
 				}
 			};
-			//cout << "| empty slots: " << emptySlot << endl;
 			
 			//checks if all possible moves have been done
 			vector<char> directions = {'u', 'd', 'l', 'r'};
-			scoreObject leftScore, rightScore, upScore, downScore;
+			scoreObject leftScoreAlgOne, rightScoreAlgOne, upScoreAlgOne, downScoreAlgOne;
+			scoreObject leftScoreAlgTwo, rightScoreAlgTwo, upScoreAlgTwo, downScoreAlgTwo;
 			
 			for(auto& direction: directions){
 				if(direction == 'u'){
-					upScore = evaluateMove(direction);
+					upScoreAlgOne = evaluateMove(direction, gridAlgOne);
 				}else if(direction == 'd'){
-					downScore = evaluateMove(direction);
+					downScoreAlgOne = evaluateMove(direction, gridAlgOne);
 				}else if(direction == 'l'){
-					leftScore = evaluateMove(direction);
+					leftScoreAlgOne = evaluateMove(direction, gridAlgOne);
 				}else{
-					rightScore = evaluateMove(direction);
+					rightScoreAlgOne = evaluateMove(direction, gridAlgOne);
 				};
 			};
 
-			if(algOneMove > 1000){
-				cout<<"Maximum moves reached"<<endl;
-				emptySlot = 0;
-				noPossibleMoves = true;
+			for(auto& direction: directions){
+				if(direction == 'u'){
+					upScoreAlgTwo = evaluateMove(direction, gridAlgTwo);
+				}else if(direction == 'd'){
+					downScoreAlgTwo = evaluateMove(direction, gridAlgTwo);
+				}else if(direction == 'l'){
+					leftScoreAlgTwo = evaluateMove(direction, gridAlgTwo);
+				}else{
+					rightScoreAlgTwo = evaluateMove(direction, gridAlgTwo);
+				};
 			};
 
-			if(emptySlot == 0 && upScore.previousScore == upScore.newScore && downScore.previousScore == downScore.newScore && leftScore.previousScore == leftScore.newScore && rightScore.previousScore == rightScore.newScore){
-				noPossibleMoves = true;
+			if(algOneMove == 1000){
+				cout<<"Maximum moves reached Alg 1"<<endl;
+				emptySlotAlgOne = 0;
+				noPossibleMovesAlgOne = true;
+			};
+
+			if(emptySlotAlgOne == 0 && upScoreAlgOne.previousScore == upScoreAlgOne.newScore && downScoreAlgOne.previousScore == downScoreAlgOne.newScore && leftScoreAlgOne.previousScore == leftScoreAlgOne.newScore && rightScoreAlgOne.previousScore == rightScoreAlgOne.newScore){
+				cout<<"No moves available Alg 1"<<endl;
+				noPossibleMovesAlgOne = true;
+			}
+
+			if(algTwoMove == 1000){
+				cout<<"Maximum moves reached Alg 2"<<endl;
+				emptySlotAlgTwo = 0;
+				noPossibleMovesAlgTwo = true;
+			};
+
+			if(emptySlotAlgTwo == 0 && upScoreAlgTwo.previousScore == upScoreAlgTwo.newScore && downScoreAlgTwo.previousScore == downScoreAlgTwo.newScore && leftScoreAlgTwo.previousScore == leftScoreAlgTwo.newScore && rightScoreAlgTwo.previousScore == rightScoreAlgTwo.newScore){
+				cout<<"No moves available Alg 2"<<endl;
+				noPossibleMovesAlgTwo = true;
 			}
 		}
 		
@@ -330,13 +454,21 @@ class Game2048{
 
 		void addElementToGrid(){
 			xy newPosition = getRandomPosition();
+
 			//cout how many empty spaces there are, check if the game is over or now
-			
-			//get new position if below is not 0 
-			while(grid[newPosition.x][newPosition.y] != 0){
-				newPosition = getRandomPosition();
+			if(algOneMove < 1000 || noPossibleMovesAlgOne != true){
+				while(gridAlgOne[newPosition.x][newPosition.y] != 0){
+					newPosition = getRandomPosition();
+				};
+				gridAlgOne[newPosition.x][newPosition.y] = startSize;
 			};
-			grid[newPosition.x][newPosition.y] = startSize;
+
+			if(algTwoMove < 1000 || noPossibleMovesAlgTwo != true){
+				while(gridAlgTwo[newPosition.x][newPosition.y] != 0){
+					newPosition = getRandomPosition();
+				};
+				gridAlgTwo[newPosition.x][newPosition.y] = startSize;
+			};
 		};
 };
 
@@ -374,30 +506,28 @@ int main(){
 		object.setUpGame();
 
 		//run the algorithm, check if solved, checck if there spaces
-		while (object.emptySlot != 0 && object.noPossibleMoves != true){
+		while (object.noPossibleMovesAlgOne != true && object.noPossibleMovesAlgTwo != true){
 			cout << "-------------------------------------------------------------------" << endl;
 			object.AlgOneGreedyAlgorithm();
+			object.AlgTwoStrategicMinimax();
 			object.checkIfSolved();
-			if(object.hasTwo == true){
-				cout << "you won!" << endl;
+
+			if(object.hasTwoAlgOne == true){
+				cout << "Alg 1 you won!" << endl;
 				break;
-			}
-			if(object.emptySlot == 0 && object.noPossibleMoves == true){
+			};
+
+			if(object.hasTwoAlgTwo == true){
+				cout << "Alg 2 you won!" << endl;
+				break;
+			};
+
+			if(object.emptySlotAlgOne == 0 && object.emptySlotAlgTwo == 0){
 				object.printCurrentGrid();
 				cout << "not empty spaces and possible moves left\nGAME OVER" << endl;
 				break;
-			}
-			
-			;
-			/*if(userInput == 'u'){
-				object.moveUp();
-			}else if(userInput == 'd'){
-				object.moveDown();
-			}else if(userInput == 'r'){
-				object.moveRight();
-			}else if(userInput == 'l'){
-				object.moveLeft();
-			}*/
+			};
+
 			object.addElementToGrid();
 			object.printCurrentGrid();
 		}
