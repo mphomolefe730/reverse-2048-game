@@ -268,7 +268,7 @@ class Game2048{
 		}
 
 		void AlgOneGreedyAlgorithm(){
-			if(algOneMove > 1000 || noPossibleMovesAlgOne == true){
+			if(noPossibleMovesAlgOne == true){
 				return;
 			};
 
@@ -298,7 +298,7 @@ class Game2048{
 		}
 
 	void AlgTwoStrategicMinimax() {
-			if(algTwoMove > 1000 || noPossibleMovesAlgTwo == true){
+			if(noPossibleMovesAlgTwo == true){
 				return;
 			};
 
@@ -456,14 +456,14 @@ class Game2048{
 			xy newPosition = getRandomPosition();
 
 			//cout how many empty spaces there are, check if the game is over or now
-			if(algOneMove < 1000 || noPossibleMovesAlgOne != true){
+			if(noPossibleMovesAlgOne != true){
 				while(gridAlgOne[newPosition.x][newPosition.y] != 0){
 					newPosition = getRandomPosition();
 				};
 				gridAlgOne[newPosition.x][newPosition.y] = startSize;
 			};
 
-			if(algTwoMove < 1000 || noPossibleMovesAlgTwo != true){
+			if(noPossibleMovesAlgTwo != true){
 				while(gridAlgTwo[newPosition.x][newPosition.y] != 0){
 					newPosition = getRandomPosition();
 				};
@@ -506,7 +506,7 @@ int main(){
 		object.setUpGame();
 
 		//run the algorithm, check if solved, checck if there spaces
-		while (object.noPossibleMovesAlgOne != true && object.noPossibleMovesAlgTwo != true){
+		while (object.noPossibleMovesAlgOne != true || object.noPossibleMovesAlgTwo != true){
 			cout << "-------------------------------------------------------------------" << endl;
 			object.AlgOneGreedyAlgorithm();
 			object.AlgTwoStrategicMinimax();
